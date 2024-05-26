@@ -13,10 +13,7 @@ RUN npm install
 # Copia el resto del código de la aplicación al directorio de trabajo
 COPY . .
 
-# Establece las variables de entorno necesarias
-ENV TOKEN=tu_token_de_discord
-# Puedes añadir otras variables de entorno según tus necesidades, por ejemplo:
-# ENV ANOTHER_VAR=otro_valor
+
 
 # Expone el puerto en el que tu aplicación escucha, si es necesario
 # EXPOSE 3000
