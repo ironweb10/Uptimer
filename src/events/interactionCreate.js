@@ -1,4 +1,4 @@
-const { EmbedBuilder, Collection, PermissionsBitField } = require('discord.js')
+const { EmbedBuilder, Collection, PermissionsBitField, InteractionType } = require('discord.js')
 const { slash } = require(`${process.cwd()}/src/functions/onCoolDown.js`);
 const { parsePermissions } = require(`${process.cwd()}/src/functions/functions.js`);
 const set = require(`${process.cwd()}/Assets/Config/settings`);
@@ -7,17 +7,23 @@ module.exports = {
   async execute(client) {
     const emojis = client.emotes;
     client.on('interactionCreate', async interaction => {
-      // ==============================< Command Handling >=============================\\
-      const slashCommand = client.slashCommands.get(interaction.commandName);
-      if (interaction.type == 4) {
-        if (slashCommand.autocomplete) {
-          const choices = [];
-          await slashCommand.autocomplete(interaction, choices)
-        }
+
+      // ==============================< Autocomplete Handling >=============================\\
+      if (interaction.type === InteractionType.ApplicationCommandAutocomplete) {
+        const slashCommand = client.slashCommands.get(interaction.commandName);
+        if (!slashCommand || !slashCommand.autocomplete) return;
+        const choices = [];
+        await slashCommand.autocomplete(interaction, choices);
+        return;
       }
-      if (!interaction.type == 2) return;
+
+      // ==============================< Only handle slash commands >=============================\\
+      if (interaction.type !== InteractionType.ApplicationCommand) return;
+
       // ==============================< If command doesn't found >=============================\\
+      const slashCommand = client.slashCommands.get(interaction.commandName);
       if (!slashCommand) return client.slashCommands.delete(interaction.commandName);
+
       // ==============================< Other Command Handling list >=============================\\
       try {
         // ==============================< Toggle off >=============================\\
@@ -38,7 +44,7 @@ module.exports = {
             content: `${emojis.MESSAGE.x} **${slashCommand.name} command is on __Maintenance Mode__** try again later!`
           })
         }
-        // ==============================< Owner Only >============================= \\            
+        // ==============================< Owner Only >============================= \\
         if (slashCommand.ownerOnly) {
           const owners = client.config.OWNERS;
           if (!owners.includes(interaction.user.id)) return await interaction.reply({
@@ -52,9 +58,9 @@ module.exports = {
         }
         // ==============================< Only for offical guilds >============================= \\
         if (slashCommand.guildOnly) {
-          const private = client.config.SERVER.OFFICIAL.Guild_ID_1
+          const privateGuilds = client.config.SERVER.OFFICIAL.Guild_ID_1
             .concat(client.config.SERVER.Guild_ID_2);
-          if (!private.includes(interaction.guild.id)) {
+          if (!privateGuilds.includes(interaction.guild.id)) {
             return interaction.reply({
               ephemeral: true,
               embeds: [
@@ -66,7 +72,7 @@ module.exports = {
           }
         }
         // ==============================< NSFW checking >============================= \\
-        if (slashCommand.nsfwOnly && !interaction.channel.nsfw) {
+        if (slashCommand.nsfwOnly && interaction.channel && !interaction.channel.nsfw) {
           return interaction.reply({
             ephemeral: true,
             embeds: [
@@ -78,19 +84,18 @@ module.exports = {
         }
         // ==============================< Permissions checking >============================= \\
         if (slashCommand.userPerms || slashCommand.botPerms) {
-          if (!interaction.memberPermissions.has(PermissionsBitField.resolve(slashCommand.userPerms || []))) {
+          if (interaction.memberPermissions && !interaction.memberPermissions.has(PermissionsBitField.resolve(slashCommand.userPerms || []))) {
             const userPerms = new EmbedBuilder()
               .setDescription(`${emojis.MESSAGE.x} ${interaction.user}, You don't have ${parsePermissions(slashCommand.userPerms)} to use this command!`)
               .setColor(client.embed.wrongcolor)
             return interaction.reply({ ephemeral: true, embeds: [userPerms] })
           }
-          if (!interaction.guild.members.cache.get(client.user.id).permissions.has(PermissionsBitField.resolve(slashCommand.botPerms || []))) {
+          if (interaction.guild && !interaction.guild.members.cache.get(client.user.id).permissions.has(PermissionsBitField.resolve(slashCommand.botPerms || []))) {
             const botPerms = new EmbedBuilder()
               .setDescription(`${emojis.MESSAGE.x} ${interaction.user}, I don't have ${parsePermissions(slashCommand.botPerms)} to use this command!`)
               .setColor(client.embed.wrongcolor)
             return interaction.reply({ ephemeral: true, embeds: [botPerms] })
           }
-
         }
         // ==============================< CoolDown checking >============================= \\
         if (slashCommand.cooldown && slash(interaction, slashCommand)) {
@@ -101,11 +106,10 @@ module.exports = {
                 .setTitle(`${emojis.MESSAGE.x} You have been cooldown for \`${slashCommand.cooldown}\` seconds!`)
                 .setDescription(`Please wait \`${slash(interaction, slashCommand).toFixed(1)}\` Before using the \`${slashCommand.name}\` command again!`)
                 .setColor(client.embed.wrongcolor)
-
             ]
           })
         }
-        // ==============================< Start The Command >============================= \\	       
+        // ==============================< Start The Command >============================= \\
         await slashCommand.run(client, interaction);
         if (client.config.CHANNELS.COMMANDS_LOGS && set.COMMANDS_LOGS) await client.channels.cache.get(client.config.CHANNELS.COMMANDS_LOGS).send({
           embeds: [new EmbedBuilder()
