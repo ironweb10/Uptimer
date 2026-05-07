@@ -1,7 +1,7 @@
 {
-  "name": "uo1428",
+  "name": "uptimer",
   "version": "1.0.0",
-  "description": "Discord.js v14 Command-Handler. Commands, Events, Permissions and Cooldown Handlers for Discord.js v14 bot - coded by Uo#1428",
+  "description": "I only fixed some bugs the original code is from Uo#1428",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -26,9 +26,5 @@
     "ms": "^2.1.3",
     "node-fetch": "^2.6.7",
     "valid-url": "^1.0.9"
-  },
-  "repository": {
-    "type": "discord",
-    "url": "https://discord.gg/pXRT2FusPb"
   }
 }
