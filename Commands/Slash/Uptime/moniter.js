@@ -1,5 +1,5 @@
 const urlsConfig = require(`${process.cwd()}/src/database/UrlsConfig`),
-  { ModalBuilder, TextInputBuilder, TextInputStyle, ApplicationCommandType, ButtonBuilder, ActionRowBuilder } = require("discord.js"),
+  { ModalBuilder, TextInputBuilder, TextInputStyle, ApplicationCommandType, ButtonBuilder, ActionRowBuilder, MessageFlags } = require("discord.js"),
   validUrl = require("valid-url");
 module.exports = {
   name: "moniter",
@@ -53,7 +53,7 @@ module.exports = {
             authorID: interaction.user.id
           }, async function(err, total) {
             return interaction.reply({
-              ephemeral: true,
+              flags: [MessageFlags.Ephemeral],
               embeds: [
                 client.Embed()
                   .setAuthor({
@@ -92,7 +92,7 @@ module.exports = {
         return interaction.showModal(modal);
       } else if (sub === "remove") {
         await interaction.reply({
-          ephemeral: true,
+          flags: [MessageFlags.Ephemeral],
           embeds: [client.loadingEmbed]
         })
         const url = interaction.options.getString("url");
@@ -329,7 +329,7 @@ module.exports = {
             lb.push(`**${count}**. \`${url.URL}\``);
           })
           if (lb.length === 0) return interaction.reply({
-            ephemeral: true,
+            flags: [MessageFlags.Ephemeral],
             embeds: [client.Embed(false).setDescription(client.emotes.MESSAGE.i + " You dont have any project.")]
           });
           require(`${process.cwd()}/src/functions/createLeaderboard.js`)(client, interaction, "・Projects", lb, true)
