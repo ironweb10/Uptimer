@@ -321,18 +321,18 @@ module.exports = {
           })
         }
       } else if (sub === "projects") {
+        await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
         urlsConfig.find({ authorID: interaction.member.user.id }, async function(err, data) {
           let lb = [];
           let count = 0;
-          data.forEach(async (url) => {
+          data.forEach((url) => {
             count++;
             lb.push(`**${count}**. \`${url.URL}\``);
-          })
-          if (lb.length === 0) return interaction.reply({
-            flags: [MessageFlags.Ephemeral],
+          });
+          if (lb.length === 0) return interaction.editReply({
             embeds: [client.Embed(false).setDescription(client.emotes.MESSAGE.i + " You dont have any project.")]
           });
-          require(`${process.cwd()}/src/functions/createLeaderboard.js`)(client, interaction, "・Projects", lb, true)
+          require(`${process.cwd()}/src/functions/createLeaderboard.js`)(client, interaction, "・Projects", lb, true, true)
         })
       }
     } catch (error) {
