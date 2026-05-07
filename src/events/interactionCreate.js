@@ -1,4 +1,4 @@
-const { EmbedBuilder, Collection, PermissionsBitField, InteractionType } = require('discord.js')
+const { EmbedBuilder, Collection, PermissionsBitField, InteractionType, MessageFlags } = require('discord.js')
 const { slash } = require(`${process.cwd()}/src/functions/onCoolDown.js`);
 const { parsePermissions } = require(`${process.cwd()}/src/functions/functions.js`);
 const set = require(`${process.cwd()}/Assets/Config/settings`);
@@ -29,7 +29,7 @@ module.exports = {
         // ==============================< Toggle off >=============================\\
         if (slashCommand.toggleOff) {
           return await interaction.reply({
-            ephemeral: true,
+            flags: [MessageFlags.Ephemeral],
             embeds: [new EmbedBuilder()
               .setTitle(`${emojis.MESSAGE.x} **That Command Has Been Disabled By The Developers! Please Try Later.**`).setColor(client.embed.wrongcolor)
             ]
@@ -40,7 +40,7 @@ module.exports = {
         // ==============================< On Mainenance Mode >============================= \\
         if (slashCommand.maintenance) {
           return await interaction.reply({
-            ephemeral: true,
+            flags: [MessageFlags.Ephemeral],
             content: `${emojis.MESSAGE.x} **${slashCommand.name} command is on __Maintenance Mode__** try again later!`
           })
         }
@@ -48,7 +48,7 @@ module.exports = {
         if (slashCommand.ownerOnly) {
           const owners = client.config.OWNERS;
           if (!owners.includes(interaction.user.id)) return await interaction.reply({
-            ephemeral: true,
+            flags: [MessageFlags.Ephemeral],
             embeds: [new EmbedBuilder()
               .setDescription(`${emojis.MESSAGE.x} **You cannot use \`${slashCommand.name}\` command as this is a developer command.**`).setColor(client.embed.wrongcolor)
             ]
@@ -62,7 +62,7 @@ module.exports = {
             .concat(client.config.SERVER.Guild_ID_2);
           if (!privateGuilds.includes(interaction.guild.id)) {
             return interaction.reply({
-              ephemeral: true,
+              flags: [MessageFlags.Ephemeral],
               embeds: [
                 new EmbedBuilder()
                   .setTitle(`${emojis.MESSAGE.x} ${interaction.user.username} You have entered an invalid command!`)
@@ -74,7 +74,7 @@ module.exports = {
         // ==============================< NSFW checking >============================= \\
         if (slashCommand.nsfwOnly && interaction.channel && !interaction.channel.nsfw) {
           return interaction.reply({
-            ephemeral: true,
+            flags: [MessageFlags.Ephemeral],
             embeds: [
               new EmbedBuilder()
                 .setDescription(`${emojis.MESSAGE.x} This command can only be used in NSFW channels!`)
@@ -88,19 +88,19 @@ module.exports = {
             const userPerms = new EmbedBuilder()
               .setDescription(`${emojis.MESSAGE.x} ${interaction.user}, You don't have ${parsePermissions(slashCommand.userPerms)} to use this command!`)
               .setColor(client.embed.wrongcolor)
-            return interaction.reply({ ephemeral: true, embeds: [userPerms] })
+            return interaction.reply({ flags: [MessageFlags.Ephemeral], embeds: [userPerms] })
           }
           if (interaction.guild && !interaction.guild.members.cache.get(client.user.id).permissions.has(PermissionsBitField.resolve(slashCommand.botPerms || []))) {
             const botPerms = new EmbedBuilder()
               .setDescription(`${emojis.MESSAGE.x} ${interaction.user}, I don't have ${parsePermissions(slashCommand.botPerms)} to use this command!`)
               .setColor(client.embed.wrongcolor)
-            return interaction.reply({ ephemeral: true, embeds: [botPerms] })
+            return interaction.reply({ flags: [MessageFlags.Ephemeral], embeds: [botPerms] })
           }
         }
         // ==============================< CoolDown checking >============================= \\
         if (slashCommand.cooldown && slash(interaction, slashCommand)) {
           return interaction.reply({
-            ephemeral: true,
+            flags: [MessageFlags.Ephemeral],
             embeds: [
               new EmbedBuilder()
                 .setTitle(`${emojis.MESSAGE.x} You have been cooldown for \`${slashCommand.cooldown}\` seconds!`)
